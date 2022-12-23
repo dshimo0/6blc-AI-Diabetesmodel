@@ -1,0 +1,48 @@
+# Import necessary libraries
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+
+# Load the diabetes dataset
+data = pd.read_csv('diabetes.csv')
+
+# Explore the data
+data.describe()
+
+# Visualize the dataset
+data.hist()
+plt.show()
+
+# Split the dataset into features and target
+X = data.drop(['Outcome'], axis=1)
+y = data['Outcome']
+
+# Split the dataset into training and testing set
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
+
+# Normalize the features
+sc_X = StandardScaler()
+X_train = sc_X.fit_transform(X_train)
+X_test = sc_X.transform(X_test)
+
+# Create the model
+knn = KNeighborsClassifier(n_neighbors=5)
+knn.fit(X_train, y_train)
+
+# Predict the results
+y_pred = knn.predict(X_test)
+
+# Evaluate the model
+from sklearn.metrics import confusion_matrix, accuracy_score
+cm = confusion_matrix(y_test, y_pred)
+accuracy = accuracy_score(y_test, y_pred)
+
+# Predict risk of developing diabetes
+def predict_risk(age, sex, bmi, sbp, glucose, insulin, homa, region):
+    x_test = [age, sex, bmi, sbp, glucose, insulin, homa, region]
+    x_test = sc_X.transform([x_test])
+    y_pred = knn.predict(x_test)
+    return y_pred[0]
